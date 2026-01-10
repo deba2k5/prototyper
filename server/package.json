@@ -1,6 +1,7 @@
 {
-  "name": "server",
+  "name": "prototyper-server",
   "version": "1.0.0",
+  "description": "Backend API server for Prototyper Chrome extension - AI-powered component generation",
   "type": "module",
   "scripts": {
     "dev": "tsx watch index.ts",
