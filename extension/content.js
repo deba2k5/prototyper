@@ -103,6 +103,7 @@
         <button class="pm-toolbar-tab" data-tab="ai">AI</button>
           <button class="pm-toolbar-tab" data-tab="style">Style</button>
           <button class="pm-toolbar-tab" data-tab="layers">Layers</button>
+          <button class="pm-toolbar-tab" data-tab="canvas">Canvas</button>
         </div>
       <div class="pm-toolbar-content">
         <div class="pm-toolbar-panel active" id="pm-panel-components">
@@ -219,6 +220,41 @@
           </div>
           <button class="pm-btn pm-btn-secondary" id="pm-clear-all" style="margin-top: 10px;">Clear All</button>
         </div>
+        
+        <div class="pm-toolbar-panel" id="pm-panel-canvas">
+          <div class="pm-style-section">
+            <div class="pm-style-section-title">Blank Canvas</div>
+            <p style="font-size: 12px; color: #71717a; margin-bottom: 12px;">Create a clean page for prototyping from scratch.</p>
+            <button class="pm-btn pm-btn-primary" id="pm-toggle-canvas">🎨 Toggle Blank Canvas</button>
+          </div>
+          
+          <div class="pm-style-section">
+            <div class="pm-style-section-title">Canvas Settings</div>
+            <div class="pm-style-group">
+              <label class="pm-style-label">Background Color</label>
+              <div class="pm-style-row">
+                <input type="color" class="pm-color-input" id="pm-canvas-bg" value="#ffffff">
+                <input type="text" class="pm-style-input" id="pm-canvas-bg-text" value="#ffffff">
+              </div>
+            </div>
+            <div class="pm-style-group">
+              <label class="pm-style-label">Canvas Size</label>
+              <select class="pm-font-select" id="pm-canvas-size">
+                <option value="fullscreen">Fullscreen</option>
+                <option value="desktop">Desktop (1440×900)</option>
+                <option value="laptop">Laptop (1280×800)</option>
+                <option value="tablet">Tablet (768×1024)</option>
+                <option value="mobile">Mobile (375×812)</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="pm-style-section">
+            <div class="pm-style-section-title">Open Blank Page</div>
+            <p style="font-size: 12px; color: #71717a; margin-bottom: 12px;">Open a new browser tab with a blank canvas page.</p>
+            <button class="pm-btn pm-btn-secondary" id="pm-open-blank-page">📄 Open Blank Page</button>
+          </div>
+        </div>
       </div>
       <div class="pm-quick-actions">
         <button class="pm-quick-btn" id="pm-quick-undo" title="Undo">↩️ Undo</button>
@@ -290,6 +326,20 @@
     document.getElementById("pm-clear-all").addEventListener("click", clearAllComponents);
     document.getElementById("pm-delete-component").addEventListener("click", deleteSelectedComponent);
     document.getElementById("pm-quick-duplicate").addEventListener("click", duplicateSelected);
+
+    // Canvas controls
+    document.getElementById("pm-toggle-canvas").addEventListener("click", toggleBlankCanvas);
+    document.getElementById("pm-open-blank-page").addEventListener("click", openBlankPage);
+    
+    document.getElementById("pm-canvas-bg").addEventListener("input", (e) => {
+      document.getElementById("pm-canvas-bg-text").value = e.target.value;
+      updateCanvasBackground(e.target.value);
+    });
+    document.getElementById("pm-canvas-bg-text").addEventListener("change", (e) => {
+      document.getElementById("pm-canvas-bg").value = e.target.value;
+      updateCanvasBackground(e.target.value);
+    });
+    document.getElementById("pm-canvas-size").addEventListener("change", updateCanvasSize);
 
     setupStyleControls();
   }
@@ -705,6 +755,78 @@
     selectComponent(null);
     updateLayerList();
     showToast("🧹 All cleared");
+  }
+
+  // ===== Blank Canvas Functions =====
+  let blankCanvasVisible = false;
+  let blankCanvas = null;
+
+  function createBlankCanvas() {
+    if (blankCanvas) return blankCanvas;
+    
+    blankCanvas = document.createElement("div");
+    blankCanvas.id = "pm-blank-canvas";
+    blankCanvas.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: #ffffff;
+      z-index: 9999;
+      display: none;
+    `;
+    document.body.appendChild(blankCanvas);
+    return blankCanvas;
+  }
+
+  function toggleBlankCanvas() {
+    const canvas = createBlankCanvas();
+    blankCanvasVisible = !blankCanvasVisible;
+    canvas.style.display = blankCanvasVisible ? "block" : "none";
+    
+    const btn = document.getElementById("pm-toggle-canvas");
+    btn.textContent = blankCanvasVisible ? "🔙 Hide Canvas" : "🎨 Toggle Blank Canvas";
+    
+    showToast(blankCanvasVisible ? "🎨 Canvas enabled" : "🔙 Canvas hidden");
+  }
+
+  function updateCanvasBackground(color) {
+    const canvas = createBlankCanvas();
+    canvas.style.background = color;
+  }
+
+  function updateCanvasSize() {
+    const canvas = createBlankCanvas();
+    const size = document.getElementById("pm-canvas-size").value;
+    
+    const sizes = {
+      fullscreen: { width: "100vw", height: "100vh", top: "0", left: "0" },
+      desktop: { width: "1440px", height: "900px", top: "50%", left: "50%", transform: "translate(-50%, -50%)" },
+      laptop: { width: "1280px", height: "800px", top: "50%", left: "50%", transform: "translate(-50%, -50%)" },
+      tablet: { width: "768px", height: "1024px", top: "50%", left: "50%", transform: "translate(-50%, -50%)" },
+      mobile: { width: "375px", height: "812px", top: "50%", left: "50%", transform: "translate(-50%, -50%)" },
+    };
+    
+    const s = sizes[size] || sizes.fullscreen;
+    canvas.style.width = s.width;
+    canvas.style.height = s.height;
+    canvas.style.top = s.top;
+    canvas.style.left = s.left;
+    canvas.style.transform = s.transform || "none";
+    canvas.style.boxShadow = size !== "fullscreen" ? "0 25px 50px -12px rgba(0,0,0,0.25)" : "none";
+    canvas.style.borderRadius = size !== "fullscreen" ? "12px" : "0";
+  }
+
+  function openBlankPage() {
+    const bgColor = document.getElementById("pm-canvas-bg").value || "#ffffff";
+    const size = document.getElementById("pm-canvas-size").value || "fullscreen";
+    
+    // Open the extension's canvas page with settings as query params
+    const canvasUrl = chrome.runtime.getURL("canvas.html");
+    const params = new URLSearchParams({ bg: bgColor, size: size });
+    window.open(`${canvasUrl}?${params}`, "_blank");
+    showToast("📄 Blank canvas opened in new tab!");
   }
 
   function duplicateSelected() {

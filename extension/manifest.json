@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "PM Visual Prototyper",
+  "name": "Prototyper",
   "version": "1.0.0",
-  "description": "Overlay and edit UI components on any website for PM presentations",
+  "description": "Visual prototyping toolkit - overlay and edit UI components on any website",
   "permissions": [
     "activeTab",
     "storage",
@@ -34,7 +34,7 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["*.css", "*.js", "html2canvas.min.js"],
+      "resources": ["*.css", "*.js", "*.html", "html2canvas.min.js", "canvas.html"],
       "matches": ["<all_urls>"]
     }
   ]
