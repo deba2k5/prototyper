@@ -15,7 +15,7 @@
 - **🎭 Blank Canvas** - Start fresh with a clean prototyping page
 - **🌙 Modern UI** - Beautiful Shadcn-inspired dark theme
 
-## 🚀 Quick Start
+## 🚀 Quick Start Guidelines
 
 ### Prerequisites
 
